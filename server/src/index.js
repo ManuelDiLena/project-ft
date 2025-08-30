@@ -5,6 +5,8 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import admin from 'firebase-admin';
+import { verifyToken } from './middlewares/auth.js';
+import { requireRole } from './middlewares/roles.js';
 
 dotenv.config();
 
@@ -61,6 +63,16 @@ app.get('/health', (req, res) => {
 // Placeholder API v1
 app.get('/api/v1/hello', (req, res) => {
   res.json({ message: 'API ready 🚀' });
+});
+
+// Private route test
+app.get('/api/v1/private', verifyToken, (req, res) => {
+  res.json({ message: `Welcome ${req.user.email}` });
+});
+
+// Futbol field admin route test
+app.get('/api/v1/fields/admin', verifyToken, requireRole('adminField'), (req, res) => {
+  res.json({ message: 'Only field admins can see this' });
 });
 
 app.listen(PORT, () => {
